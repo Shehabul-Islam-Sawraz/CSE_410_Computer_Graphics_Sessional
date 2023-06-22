@@ -114,9 +114,9 @@ void BobMotion()
 {
     glColor3f(.65, .39, .15);
     glPushMatrix();
-    glTranslatef(0, 0, 0);
-    glRotatef(theta_bob, 0, 0, 1);
-    glTranslatef(0, 0, 0);
+    // glTranslatef(0, 0, 0);
+    glRotatef(angle, 0, 0, 1);
+    // glTranslatef(0, 0, 0);
     DrawCircle(0, -9, 12);
     glLineWidth(7);
     glBegin(GL_LINES);
@@ -133,22 +133,22 @@ void BobMotion()
     }
     glEnd();
     glPopMatrix();
-    if (flag == 0)
-    {
-        theta_bob = angle;
-        if (theta_bob >= BOB_AMPLITUDE)
-        {
-            flag = 1;
-        }
-    }
-    else
-    {
-        theta_bob = angle;
-        if (theta_bob <= -BOB_AMPLITUDE)
-        {
-            flag = 0;
-        }
-    }
+    // if (flag == 0)
+    // {
+    //     theta_bob = angle;
+    //     if (theta_bob >= BOB_AMPLITUDE)
+    //     {
+    //         flag = 1;
+    //     }
+    // }
+    // else
+    // {
+    //     theta_bob = angle;
+    //     if (theta_bob <= -BOB_AMPLITUDE)
+    //     {
+    //         flag = 0;
+    //     }
+    // }
 }
 
 void line(double x1, double y1, double x2, double y2)
