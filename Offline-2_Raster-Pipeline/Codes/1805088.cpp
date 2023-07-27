@@ -18,6 +18,8 @@ int main()
     double upX, upY, upZ;
     double fovY, aspectRatio, near, far;
 
+    int noOfTriangles = 0;
+
     // Stage 1 Start
     // -------------
     scene.open(SCENE_FILE);
@@ -57,6 +59,8 @@ int main()
             stage << point2;
             stage << point3;
             stage << endl;
+
+            noOfTriangles++;
         }
         else if (cmd == "translate")
         {
@@ -111,6 +115,46 @@ int main()
 
     scene.close();
     stage.close();
+
+    // Stage 1 End
+    // -----------
+
+    // Stage 2 Start
+    // -------------
+
+    scene.open(STAGE1_FILE);
+    stage.open(STAGE2_FILE);
+
+    PointVector look(lookX, lookY, lookZ);
+    PointVector eye(eyeX, eyeY, eyeZ);
+    PointVector up(upX, upY, upZ);
+
+    Matrix matrix = Matrix::identityMatrix();
+    matrix = matrix.viewTransformationMatrix(look, eye, up);
+
+    for (int n = 1; n <= noOfTriangles; n++)
+    {
+        PointVector point1, point2, point3;
+
+        scene >> point1.x >> point1.y >> point1.z;
+        scene >> point2.x >> point2.y >> point2.z;
+        scene >> point3.x >> point3.y >> point3.z;
+
+        point1 = matrix * point1;
+        point2 = matrix * point2;
+        point3 = matrix * point3;
+
+        stage << point1;
+        stage << point2;
+        stage << point3;
+        stage << endl;
+    }
+
+    scene.close();
+    stage.close();
+
+    // Stage 2 End
+    // -----------
 
     return 0;
 }

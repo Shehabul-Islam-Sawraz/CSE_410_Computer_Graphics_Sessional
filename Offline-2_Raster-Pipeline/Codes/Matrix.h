@@ -143,4 +143,28 @@ public:
         }
         return temp;
     }
+
+    Matrix viewTransformationMatrix(PointVector look, PointVector eye, PointVector up)
+    {
+        PointVector l = look - eye;
+        l.normalize();
+        PointVector r = l.crossProduct(up);
+        r.normalize();
+        PointVector u = r.crossProduct(l);
+
+        Matrix T = translateMatrix(-eye.x, -eye.y, -eye.z);
+        this->matrix[0][0] = r.x;
+        this->matrix[0][1] = r.y;
+        this->matrix[0][2] = r.z;
+
+        this->matrix[1][0] = u.x;
+        this->matrix[1][1] = u.y;
+        this->matrix[1][2] = u.z;
+
+        this->matrix[2][0] = -l.x;
+        this->matrix[2][1] = -l.y;
+        this->matrix[2][2] = -l.z;
+
+        return *this * T; // V = RT
+    }
 };
