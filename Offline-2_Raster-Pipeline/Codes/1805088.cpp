@@ -3,10 +3,10 @@
 
 using namespace std;
 
-#define SCENE_FILE "../Test-Cases/1/scene.txt"
-#define STAGE1_FILE "../Test-Cases/1/mystage1.txt"
-#define STAGE2_FILE "../Test-Cases/1/mystage2.txt"
-#define STAGE3_FILE "../Test-Cases/1/mystage3.txt"
+#define SCENE_FILE "../Test-Cases/4/scene.txt"
+#define STAGE1_FILE "../Test-Cases/4/mystage1.txt"
+#define STAGE2_FILE "../Test-Cases/4/mystage2.txt"
+#define STAGE3_FILE "../Test-Cases/4/mystage3.txt"
 
 int main()
 {
@@ -38,7 +38,7 @@ int main()
     while (true)
     {
         scene >> cmd;
-        cout << cmd << endl;
+        // cout << cmd << endl;
 
         if (cmd == "triangle")
         {
@@ -51,9 +51,9 @@ int main()
             point2 = st.top() * point2;
             point3 = st.top() * point3;
 
-            // point1.scale();
-            // point2.scale();
-            // point3.scale();
+            point1.scale();
+            point2.scale();
+            point3.scale();
 
             stage << point1;
             stage << point2;
@@ -129,8 +129,8 @@ int main()
     PointVector eye(eyeX, eyeY, eyeZ);
     PointVector up(upX, upY, upZ);
 
-    Matrix matrix = Matrix::identityMatrix();
-    matrix = matrix.viewTransformationMatrix(look, eye, up);
+    Matrix viewMatrix = Matrix::identityMatrix();
+    viewMatrix = viewMatrix.viewTransformationMatrix(look, eye, up);
 
     for (int n = 1; n <= noOfTriangles; n++)
     {
@@ -140,9 +140,13 @@ int main()
         scene >> point2.x >> point2.y >> point2.z;
         scene >> point3.x >> point3.y >> point3.z;
 
-        point1 = matrix * point1;
-        point2 = matrix * point2;
-        point3 = matrix * point3;
+        point1 = viewMatrix * point1;
+        point2 = viewMatrix * point2;
+        point3 = viewMatrix * point3;
+
+        point1.scale();
+        point2.scale();
+        point3.scale();
 
         stage << point1;
         stage << point2;
@@ -154,6 +158,43 @@ int main()
     stage.close();
 
     // Stage 2 End
+    // -----------
+
+    // Stage 3 Start
+    // -------------
+
+    scene.open(STAGE2_FILE);
+    stage.open(STAGE3_FILE);
+
+    Matrix projectMatrix = Matrix::identityMatrix();
+    projectMatrix = projectMatrix.projectionMatrix(fovY, aspectRatio, near, far);
+
+    for (int n = 1; n <= noOfTriangles; n++)
+    {
+        PointVector point1, point2, point3;
+
+        scene >> point1.x >> point1.y >> point1.z;
+        scene >> point2.x >> point2.y >> point2.z;
+        scene >> point3.x >> point3.y >> point3.z;
+
+        point1 = projectMatrix * point1;
+        point2 = projectMatrix * point2;
+        point3 = projectMatrix * point3;
+
+        point1.scale();
+        point2.scale();
+        point3.scale();
+
+        stage << point1;
+        stage << point2;
+        stage << point3;
+        stage << endl;
+    }
+
+    scene.close();
+    stage.close();
+
+    // Stage 3 End
     // -----------
 
     return 0;

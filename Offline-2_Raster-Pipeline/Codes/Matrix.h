@@ -167,4 +167,20 @@ public:
 
         return *this * T; // V = RT
     }
+
+    Matrix projectionMatrix(double fovY, double aspectRatio, double near, double far)
+    {
+        double fovX = fovY * aspectRatio;
+        double t = near * tan(degToRad(fovY / 2));
+        double r = near * tan(degToRad(fovX / 2));
+
+        this->matrix[0][0] = near / r;
+        this->matrix[1][1] = near / t;
+        this->matrix[2][2] = -(far + near) / (far - near);
+        this->matrix[2][3] = -(2 * far * near) / (far - near);
+        this->matrix[3][2] = -1;
+        this->matrix[3][3] = 0;
+
+        return *this;
+    }
 };
