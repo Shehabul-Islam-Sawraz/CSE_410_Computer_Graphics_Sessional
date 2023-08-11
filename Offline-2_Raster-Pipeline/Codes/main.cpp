@@ -1,16 +1,16 @@
 #include <bits/stdc++.h>
 #include "Triangle.h"
-#include "Color.h"
+#include "bitmap_image.hpp"
 
 using namespace std;
 
-#define SCENE_FILE "../Test-Cases/1/scene.txt"
-#define CONFIG_FILE "../Test-Cases/1/config.txt"
-#define STAGE1_FILE "../Test-Cases/1/mystage1.txt"
-#define STAGE2_FILE "../Test-Cases/1/mystage2.txt"
-#define STAGE3_FILE "../Test-Cases/1/mystage3.txt"
-#define Z_BUFFER_FILE "../Test-Cases/1/my_z_buffer.txt"
-#define BMP_FILE "../Test-Cases/1/myout.bmp"
+#define SCENE_FILE "../Test-Cases/5/scene.txt"
+#define CONFIG_FILE "../Test-Cases/5/config.txt"
+#define STAGE1_FILE "../Test-Cases/5/mystage1.txt"
+#define STAGE2_FILE "../Test-Cases/5/mystage2.txt"
+#define STAGE3_FILE "../Test-Cases/5/mystage3.txt"
+#define Z_BUFFER_FILE "../Test-Cases/5/my_z_buffer.txt"
+#define BMP_FILE "../Test-Cases/5/myout.bmp"
 
 static unsigned long int g_seed = 1;
 
@@ -277,11 +277,15 @@ int main()
 
     for (Triangle triangle : triangles)
     {
+        // Set color for each triangle
+        triangle.setColor(random(), random(), random());
+
         double tri_max_y = triangle.getMaxY();
         double tri_min_y = triangle.getMinY();
+        // cout << tri_max_y << " " << tri_min_y << endl;
 
-        // Clipping Start
-        // --------------
+        // Clipping of y value Start
+        // -------------------------
         int top_scanline_index, bottom_scanline_index;
 
         if (tri_max_y >= Top_Y)
@@ -301,10 +305,203 @@ int main()
         {
             bottom_scanline_index = screen_height - int(round(tri_min_y - Bottom_Y) / dy);
         }
+        // cout << top_scanline_index << " " << bottom_scanline_index << endl;
 
         // Clipping End
         // ------------
+
+        for (int row = top_scanline_index; row < bottom_scanline_index; row++)
+        {
+            double middle_val_y = Top_Y - row * dy;
+
+            PointVector intersectionPoints[3];
+            // Initialize intersectiong points with dummy values where point.y=middle_val_y
+            for (int x = 0; x < 3; x++)
+            {
+                intersectionPoints[x] = PointVector(INFINITY, middle_val_y, INFINITY);
+            }
+
+            // Find the values of x,z of intersectiong points of the three side of triangles with current row
+            for (int ind = 0; ind < 3; ind++)
+            {
+                PointVector vertex1 = triangle.vertex[ind % 3];
+                PointVector vertex2 = triangle.vertex[(ind + 1) % 3];
+
+                // If values of y of two vertex is same then no intersection will be found
+                if (vertex1.y != vertex2.y)
+                {
+                    /*
+                        We know x,y,z of two vertex. We want to know the value of x & z, where y = middle_val_y
+                                              x1 - x2
+                        x = x1 + (y - y1) x __________
+                                              y1 - y2
+                    */
+                    double val_x = vertex1.x + (middle_val_y - vertex1.y) * ((vertex1.x - vertex2.x) / (vertex1.y - vertex2.y));
+                    double val_z = vertex1.z + (middle_val_y - vertex1.y) * ((vertex1.z - vertex2.z) / (vertex1.y - vertex2.y));
+
+                    intersectionPoints[ind].x = val_x;
+                    intersectionPoints[ind].z = val_z;
+                }
+            }
+
+            // Now, check for invalid values of intersecting points
+            for (int ind = 0; ind < 3; ind++)
+            {
+                PointVector vertex1 = triangle.vertex[ind % 3];
+                PointVector vertex2 = triangle.vertex[(ind + 1) % 3];
+
+                if (intersectionPoints[ind].x != INFINITY)
+                {
+                    if ((intersectionPoints[ind].x > max(vertex1.x, vertex2.x)) || (intersectionPoints[ind].x < min(vertex1.x, vertex2.x)))
+                    {
+                        intersectionPoints[ind].x = INFINITY;
+                    }
+                }
+
+                if (intersectionPoints[ind].z != INFINITY)
+                {
+                    if ((intersectionPoints[ind].z > max(vertex1.z, vertex2.z)) || (intersectionPoints[ind].z < min(vertex1.z, vertex2.z)))
+                    {
+                        intersectionPoints[ind].z = INFINITY;
+                    }
+                }
+            }
+
+            int min_x_index = -1, max_x_index = -1;
+            double tri_max_x = -INFINITY, tri_min_x = INFINITY;
+
+            for (int ind = 0; ind < 3; ind++)
+            {
+                if (intersectionPoints[ind].x != INFINITY)
+                {
+                    if (intersectionPoints[ind].x < tri_min_x)
+                    {
+                        min_x_index = ind;
+                        tri_min_x = intersectionPoints[ind].x;
+                    }
+
+                    if (intersectionPoints[ind].x > tri_max_x)
+                    {
+                        max_x_index = ind;
+                        tri_max_x = intersectionPoints[ind].x;
+                    }
+                }
+            }
+
+            // cout << tri_max_x << " " << tri_min_x << endl;
+            // cout << Left_X << " " << Right_X << endl;
+
+            // Clipping of x value start
+            // -------------------------
+
+            int left_intersecting_col, right_intersecting_col;
+
+            if (tri_min_x <= Left_X)
+            {
+                left_intersecting_col = 0;
+            }
+            else
+            {
+                left_intersecting_col = int(round((tri_min_x - Left_X) / dx));
+            }
+
+            if (tri_max_x >= Right_X)
+            {
+                right_intersecting_col = screen_width;
+            }
+            else
+            {
+                right_intersecting_col = screen_width - int(round((Right_X - tri_max_x) / dx));
+            }
+
+            // cout << left_intersecting_col << " " << right_intersecting_col << endl;
+
+            // Clipping End
+            // ------------
+
+            // Calculating the constant term for change by dx
+            // ----------------------------------------------
+
+            double x1 = intersectionPoints[min_x_index].x;
+            double x2 = intersectionPoints[max_x_index].x;
+            double z1 = intersectionPoints[min_x_index].z;
+            double z2 = intersectionPoints[max_x_index].z;
+
+            double const_change_val = ((z1 - z2) / (x1 - x2)) * dx;
+
+            // ----------------------------------------------
+
+            for (int col = left_intersecting_col; col < right_intersecting_col; col++)
+            {
+                double val_x = Left_X + col * dx;
+                double val_z;
+
+                if (col == left_intersecting_col)
+                {
+                    val_z = z1 + (z1 - z2) * ((val_x - x1) / (x1 - x2));
+                }
+                else
+                {
+                    val_z += const_change_val;
+                }
+
+                if (val_z > z_front_limit)
+                {
+                    if (val_z < z_buffer[row][col])
+                    {
+                        z_buffer[row][col] = val_z;
+                        frame_buffer[row][col] = triangle.triangleColor;
+                    }
+                }
+            }
+        }
     }
+
+    // Creating bitmap image
+
+    bitmap_image image(screen_width, screen_height);
+
+    for (int row = 0; row < screen_height; row++)
+    {
+        for (int col = 0; col < screen_width; col++)
+        {
+            if (z_buffer[row][col] < z_rear_limit)
+            {
+                stage << fixed << setprecision(6) << z_buffer[row][col] << "\t";
+            }
+
+            image.set_pixel(col, row, frame_buffer[row][col].r, frame_buffer[row][col].g, frame_buffer[row][col].b);
+        }
+        stage << endl;
+    }
+
+    image.save_image(BMP_FILE);
+
+    scene.close();
+    config.close();
+    stage.close();
+
+    // Stage 4 Ends
+    // ------------
+
+    // Free Memory Starts
+    // ------------------
+
+    for (int i = 0; i < screen_height; i++)
+    {
+        z_buffer[i].clear();
+        z_buffer[i].shrink_to_fit();
+        frame_buffer[i].clear();
+        frame_buffer[i].shrink_to_fit();
+    }
+
+    z_buffer.clear();
+    z_buffer.shrink_to_fit();
+    frame_buffer.clear();
+    frame_buffer.shrink_to_fit();
+
+    // Free Memory Ends
+    // ----------------
 
     return 0;
 }

@@ -1,9 +1,11 @@
 #include "Matrix.h"
+#include "Color.h"
 
 class Triangle
 {
 public:
     PointVector vertex[3];
+    Color triangleColor;
 
     Triangle() {}
 
@@ -32,5 +34,11 @@ public:
     double getMinY()
     {
         return min(min(vertex[0].y, vertex[1].y), vertex[2].y);
+    }
+
+    Color setColor(int b, int g, int r)
+    {
+        this->triangleColor = Color(r, g, b);
+        return this->triangleColor;
     }
 };
