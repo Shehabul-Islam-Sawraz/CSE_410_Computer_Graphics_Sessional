@@ -4,13 +4,13 @@
 
 using namespace std;
 
-#define SCENE_FILE "../Test-Cases/5/scene.txt"
-#define CONFIG_FILE "../Test-Cases/5/config.txt"
-#define STAGE1_FILE "../Test-Cases/5/mystage1.txt"
-#define STAGE2_FILE "../Test-Cases/5/mystage2.txt"
-#define STAGE3_FILE "../Test-Cases/5/mystage3.txt"
-#define Z_BUFFER_FILE "../Test-Cases/5/my_z_buffer.txt"
-#define BMP_FILE "../Test-Cases/5/myout.bmp"
+#define SCENE_FILE "../Test-Cases/3/scene.txt"
+#define CONFIG_FILE "../Test-Cases/3/config.txt"
+#define STAGE1_FILE "../Test-Cases/3/mystage1.txt"
+#define STAGE2_FILE "../Test-Cases/3/mystage2.txt"
+#define STAGE3_FILE "../Test-Cases/3/mystage3.txt"
+#define Z_BUFFER_FILE "../Test-Cases/3/my_z_buffer.txt"
+#define BMP_FILE "../Test-Cases/3/myout.bmp"
 
 static unsigned long int g_seed = 1;
 
