@@ -64,6 +64,13 @@
     "iosfwd": "cpp",
     "iostream": "cpp",
     "random": "cpp",
-    "numbers": "c"
+    "numbers": "c",
+    "ostream": "cpp",
+    "deque": "cpp",
+    "string": "cpp",
+    "vector": "cpp",
+    "new": "cpp",
+    "cmath": "cpp",
+    "complex": "cpp"
   }
 }
