@@ -27,10 +27,13 @@ class Sphere;
 
 extern int level_of_recursion;
 extern bool texture_mode, texture_loaded;
+extern double fov_y;
 
 extern vector<Object *> objects;
 extern vector<PointLight *> pointLights;
 extern vector<SpotLight *> spotLights;
+
+extern PointVector pos;
 
 template <typename type>
 int minIndex(const vector<type> &list, type minval, type maxval)
@@ -555,8 +558,11 @@ public:
                 }
                 else
                 {
-                    glColor3d(255, 255, 255);
+                    glColor3d(1, 1, 1);
                 }
+
+                glPushMatrix();
+                glTranslatef(-fov_y + int(pos.x / tile_width / 2) * tile_width * 2, -fov_y + int(pos.y / tile_width / 2) * tile_width * 2, 0);
 
                 glBegin(GL_QUADS);
                 {
@@ -566,6 +572,8 @@ public:
                     glVertex3f(reference_point.x + col * tile_width, reference_point.y + tile_width * (row + 1), reference_point.z);
                 }
                 glEnd();
+
+                glPopMatrix();
             }
         }
     }

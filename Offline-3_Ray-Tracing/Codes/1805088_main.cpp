@@ -529,7 +529,7 @@ int main(int argc, char **argv)
 {
     pos.x = 200;
     pos.y = 200;
-    pos.z = 60;
+    pos.z = 50;
 
     l.x = -1 / sqrt(2.00);
     l.y = -1 / sqrt(2.00);
