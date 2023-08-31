@@ -48,16 +48,17 @@ int minIndex(const vector<type> &list, type minval, type maxval)
     return minIdx;
 }
 
-void drawSphere(double radius, int noOfStacks, int noOfSlices, bool isLightSource)
+void drawSphere(double radius, int noOfStacks, int noOfSlices, bool isLightSource,
+                double tx, double ty, double tz, double color_r, double color_g, double color_b)
 {
     PointVector points[noOfStacks][noOfSlices];
     int i, j;
     double h, r;
-    for (i = 0; i <= noOfStacks; i++)
+    for (i = 0; i < noOfStacks; i++)
     {
         h = radius * sin(((double)i / (double)noOfStacks) * (PI / 2));
         r = radius * cos(((double)i / (double)noOfStacks) * (PI / 2));
-        for (j = 0; j <= noOfSlices; j++)
+        for (j = 0; j < noOfSlices; j++)
         {
             points[i][j] = PointVector(r * cos(((double)j / (double)noOfSlices) * 2 * PI),
                                        r * sin(((double)j / (double)noOfSlices) * 2 * PI), h);
@@ -66,6 +67,9 @@ void drawSphere(double radius, int noOfStacks, int noOfSlices, bool isLightSourc
     // draw quads using generated points
     for (i = 0; i < noOfStacks; i++)
     {
+        glPushMatrix();
+        glColor3d(color_r, color_g, color_b);
+        glTranslatef(tx, ty, tz);
         if (isLightSource)
         {
             glColor3d((double)i / (double)noOfStacks, (double)i / (double)noOfStacks, (double)i / (double)noOfStacks);
@@ -73,20 +77,21 @@ void drawSphere(double radius, int noOfStacks, int noOfSlices, bool isLightSourc
         for (j = 0; j < noOfSlices; j++)
         {
             glBegin(GL_QUADS);
-
-            // upper hemisphere
-            glVertex3f(points[i][j].x, points[i][j].y, points[i][j].z);
-            glVertex3f(points[i][j + 1].x, points[i][j + 1].y, points[i][j + 1].z);
-            glVertex3f(points[i + 1][j + 1].x, points[i + 1][j + 1].y, points[i + 1][j + 1].z);
-            glVertex3f(points[i + 1][j].x, points[i + 1][j].y, points[i + 1][j].z);
-            // lower hemisphere
-            glVertex3f(points[i][j].x, points[i][j].y, -points[i][j].z);
-            glVertex3f(points[i][j + 1].x, points[i][j + 1].y, -points[i][j + 1].z);
-            glVertex3f(points[i + 1][j + 1].x, points[i + 1][j + 1].y, -points[i + 1][j + 1].z);
-            glVertex3f(points[i + 1][j].x, points[i + 1][j].y, -points[i + 1][j].z);
-
+            {
+                // upper hemisphere
+                glVertex3f(points[i][j].x, points[i][j].y, points[i][j].z);
+                glVertex3f(points[i][j + 1].x, points[i][j + 1].y, points[i][j + 1].z);
+                glVertex3f(points[i + 1][j + 1].x, points[i + 1][j + 1].y, points[i + 1][j + 1].z);
+                glVertex3f(points[i + 1][j].x, points[i + 1][j].y, points[i + 1][j].z);
+                // lower hemisphere
+                glVertex3f(points[i][j].x, points[i][j].y, -points[i][j].z);
+                glVertex3f(points[i][j + 1].x, points[i][j + 1].y, -points[i][j + 1].z);
+                glVertex3f(points[i + 1][j + 1].x, points[i + 1][j + 1].y, -points[i + 1][j + 1].z);
+                glVertex3f(points[i + 1][j].x, points[i + 1][j].y, -points[i + 1][j].z);
+            }
             glEnd();
         }
+        glPopMatrix();
     }
 }
 
@@ -188,11 +193,13 @@ void drawPointLightSource(PointVector pos, double fallOffParameter)
     glPushMatrix();
     glColor3f(1.0f, 1.0f, 1.0f);
     glTranslatef(pos.x, pos.y, pos.z);
-    // glutSolidSphere(5, 16, 16);
+    glutSolidSphere(3, 16, 16);
     /**
      * Eikhane is Light Source er false k true banaite hbe naki check kora lagbe
      */
-    drawSphere(5, 16, 16, false);
+    // drawSphere(5, 16, 16, false,
+    //            pos.x, pos.y, pos.z,
+    //            1.0f, 1.0f, 1.0f);
     glPopMatrix();
 }
 
@@ -614,15 +621,15 @@ public:
 
         if (c == 0) // Black
         {
-            tex_x = (int)(blackTextureImg.width() * x) / tile_width;
-            tex_y = (int)(blackTextureImg.height() * y) / tile_width;
+            tex_x = (int)(blackTextureImg.height() * x) / tile_width;
+            tex_y = (int)(blackTextureImg.width() * y) / tile_width;
 
             return textureBlack[tex_x][tex_y];
         }
         else
         {
-            tex_x = (int)(whiteTextureImg.width() * x) / tile_width;
-            tex_y = (int)(whiteTextureImg.height() * y) / tile_width;
+            tex_x = (int)(whiteTextureImg.height() * x) / tile_width;
+            tex_y = (int)(whiteTextureImg.width() * y) / tile_width;
 
             return textureWhite[tex_x][tex_y];
         }
@@ -655,8 +662,10 @@ public:
         glPushMatrix();
         glColor3d(this->color.r, this->color.g, this->color.b);
         glTranslated(this->reference_point.x, this->reference_point.y, this->reference_point.z);
-        // glutSolidSphere(radius, N_SLICES, N_STACKS);
-        drawSphere(radius, N_STACKS, N_SLICES, false);
+        glutSolidSphere(radius, N_SLICES, N_STACKS);
+        // drawSphere(radius, N_STACKS, N_SLICES, false,
+        //            this->reference_point.x, this->reference_point.y, this->reference_point.z,
+        //            this->color.r, this->color.g, this->color.b);
         glPopMatrix();
     }
 

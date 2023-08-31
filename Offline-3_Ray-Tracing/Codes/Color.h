@@ -1,11 +1,11 @@
 class Color
 {
 public:
-    int r, g, b;
+    double r, g, b;
 
     Color() {}
 
-    Color(int r, int g, int b)
+    Color(double r, double g, double b)
     {
         this->r = r;
         this->g = g;

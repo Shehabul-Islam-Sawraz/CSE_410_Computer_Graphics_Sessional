@@ -2,11 +2,11 @@
 
 using namespace std;
 
-GLdouble near_distance;
-GLdouble far_distance;
-GLdouble fov_x;
-GLdouble fov_y;
-GLdouble aspect_ratio;
+double near_distance;
+double far_distance;
+double fov_x;
+double fov_y;
+double aspect_ratio;
 int level_of_recursion = 0;
 int screen_size = 0;
 bool draw_axes, texture_mode, texture_loaded;
@@ -23,7 +23,7 @@ vector<SpotLight *> spotLights;
 #define GL_WINDOW_WIDTH 700
 #define CHECKERBOARD_WIDTH 800
 
-#define INPUT_FILE "../Assignment-RayTracer/scene.txt"
+#define INPUT_FILE "../Assignment-RayTracer/description.txt"
 #define IMG_PATH_TEXTURE_BLACK "../Assignment-RayTracer/texture_b.bmp"
 #define IMG_PATH_TEXTURE_WHITE "../Assignment-RayTracer/texture_w.bmp"
 
@@ -35,7 +35,7 @@ void drawAxes()
 {
     if (draw_axes)
     {
-        glLineWidth(3);
+        glLineWidth(1.5);
         glBegin(GL_LINES);
         glColor3f(1, 0, 0); // Red
         // X axis
@@ -150,6 +150,8 @@ void load_data()
         exit(0);
     }
 
+    cout << "Load Data Start" << endl;
+
     input >> near_distance >> far_distance >> fov_y >> aspect_ratio;
     input >> level_of_recursion >> screen_size;
 
@@ -168,6 +170,8 @@ void load_data()
     checkBoard->setCoEfficients(cb_ambient, cb_diffuse, 0.0, cb_reflection);
     checkBoard->setShine(10);
 
+    objects.push_back(checkBoard);
+
     Object *object;
     int noOfObjects;
     string objectType;
@@ -177,6 +181,7 @@ void load_data()
     for (int i = 0; i < noOfObjects; i++)
     {
         input >> objectType;
+        // cout << objectType << endl;
 
         if (objectType == "sphere")
         {
@@ -300,10 +305,10 @@ void keyboardListener(unsigned char key, int x, int y)
     case '0':
         if (texture_mode)
         {
-            if (texture_loaded != 1)
+            if (!texture_loaded)
             {
                 checkBoard->loadTexture(IMG_PATH_TEXTURE_BLACK, IMG_PATH_TEXTURE_WHITE);
-                texture_loaded = 1;
+                texture_loaded = true;
             }
         }
         traceRays();
@@ -497,20 +502,22 @@ void display()
 
     drawAxes();
 
-    // for (Object *each : objects)
-    // {
-    //     each->draw();
-    // }
+    // checkBoard->draw();
 
-    // for (PointLight *light : pointLights)
-    // {
-    //     light->draw();
-    // }
+    for (Object *each : objects)
+    {
+        each->draw();
+    }
 
-    // for (SpotLight *light : spotLights)
-    // {
-    //     light->draw();
-    // }
+    for (PointLight *light : pointLights)
+    {
+        light->draw();
+    }
+
+    for (SpotLight *light : spotLights)
+    {
+        light->draw();
+    }
 
     glutSwapBuffers();
 }
@@ -519,7 +526,7 @@ int main(int argc, char **argv)
 {
     pos.x = 200;
     pos.y = 200;
-    pos.z = 0;
+    pos.z = 60;
 
     l.x = -1 / sqrt(2.00);
     l.y = -1 / sqrt(2.00);
@@ -548,9 +555,9 @@ int main(int argc, char **argv)
     glutDisplayFunc(display); // display callback function
     glutIdleFunc(animate);    // what you want to do in the idle time (when no drawing is occuring)
 
-    // glutKeyboardFunc(keyboardListener);
-    // glutSpecialFunc(specialKeyListener);
-    // glutMouseFunc(mouseListener);
+    glutKeyboardFunc(keyboardListener);
+    glutSpecialFunc(specialKeyListener);
+    glutMouseFunc(mouseListener);
 
     glutMainLoop(); // The main loop of OpenGL
 
