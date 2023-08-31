@@ -193,7 +193,7 @@ void drawPointLightSource(PointVector pos, double fallOffParameter)
     glPushMatrix();
     glColor3f(1.0f, 1.0f, 1.0f);
     glTranslatef(pos.x, pos.y, pos.z);
-    glutSolidSphere(3, 16, 16);
+    glutSolidSphere(2, 16, 16);
     /**
      * Eikhane is Light Source er false k true banaite hbe naki check kora lagbe
      */
@@ -399,19 +399,24 @@ public:
 
         for (SpotLight *eachSpotLight : spotLights)
         {
+            // cout << "Eikhane aise 1" << endl;
             PointVector lightDirection = eachSpotLight->light_direction;
             double distance = sqrt(lightDirection.x * lightDirection.x +
                                    lightDirection.y * lightDirection.y +
                                    lightDirection.z * lightDirection.z);
             lightDirection.normalize();
 
-            PointVector lightToIntersect = intPoint - eachSpotLight->position_source;
+            PointVector lightToIntersect = eachSpotLight->position_source - intPoint;
             lightToIntersect.normalize();
+
+            // cout << "Eikhane aise 2" << endl;
 
             double cos_theta = lightDirection.dotProduct(lightToIntersect);
             double theta = radToDeg(acos(cos_theta));
 
-            if (theta > eachSpotLight->cutoff_angle)
+            // cout << theta << endl;
+
+            if (fabs(theta) > eachSpotLight->cutoff_angle)
             {
                 continue;
             }
@@ -420,11 +425,15 @@ public:
             //	Except the beginning part of the spotLight,
             //	remaining will be the same as PointLight
 
+            // cout << "Eikhane aise 3" << endl;
+
             lightDirection = eachSpotLight->position_source - intPoint;
             lightDirection.normalize();
 
             PointVector lightPosition = intPoint + lightDirection * EPSILON;
             Ray lightRay(lightPosition, lightDirection);
+
+            // cout << "Eikhane aise 4" << endl;
 
             Color tempColor;
             double t, t_min_original = INFINITY;
@@ -437,6 +446,8 @@ public:
                     t_min_original = t;
                 }
             }
+
+            // cout << "Eikhane aise 5" << endl;
 
             if (t_min < t_min_original)
             {
@@ -454,6 +465,8 @@ public:
                 color = color + this->getColorAt(intPoint) * phongValue * this->coEfficients[2];
                 color.normalize();
             }
+
+            // cout << "Eikhane aise 6" << endl;
         }
 
         //	----------------------------
@@ -621,17 +634,35 @@ public:
 
         if (c == 0) // Black
         {
-            tex_x = (int)(blackTextureImg.height() * x) / tile_width;
-            tex_y = (int)(blackTextureImg.width() * y) / tile_width;
+            tex_x = (int)(blackTextureImg.width() * x) / tile_width;
+            tex_y = (int)(blackTextureImg.height() * y) / tile_width;
 
-            return textureBlack[tex_x][tex_y];
+            // return textureBlack[tex_x][tex_y];
+            unsigned char r, g, b;
+            blackTextureImg.get_pixel(tex_x, tex_y, r, g, b);
+            // cout << __LINE__ << endl;
+
+            double color_r = c * tile + (r / 255.0) * tex;
+            double color_g = c * tile + (g / 255.0) * tex;
+            double color_b = c * tile + (b / 255.0) * tex;
+
+            return Color(color_r, color_g, color_b);
         }
         else
         {
-            tex_x = (int)(whiteTextureImg.height() * x) / tile_width;
-            tex_y = (int)(whiteTextureImg.width() * y) / tile_width;
+            tex_x = (int)(whiteTextureImg.width() * x) / tile_width;
+            tex_y = (int)(whiteTextureImg.height() * y) / tile_width;
 
-            return textureWhite[tex_x][tex_y];
+            // return textureWhite[tex_x][tex_y];
+            unsigned char r, g, b;
+            whiteTextureImg.get_pixel(tex_x, tex_y, r, g, b);
+            // cout << __LINE__ << endl;
+
+            double color_r = c * tile + (r / 255.0) * tex;
+            double color_g = c * tile + (g / 255.0) * tex;
+            double color_b = c * tile + (b / 255.0) * tex;
+
+            return Color(color_r, color_g, color_b);
         }
 
         // unsigned char r, g, b;

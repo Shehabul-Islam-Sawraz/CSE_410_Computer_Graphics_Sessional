@@ -89,4 +89,9 @@ public:
         out << fixed << setprecision(7) << point.x << " " << point.y << " " << point.z << endl;
         return out;
     }
+
+    double length()
+    {
+        return sqrt(x * x + y * y + z * z);
+    }
 };

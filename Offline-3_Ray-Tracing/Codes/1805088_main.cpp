@@ -119,7 +119,10 @@ void traceRays()
                 t_min = objects[nearest]->intersect(ray, color, 1);
             }
             color.normalize();
-            image.set_pixel(col, row, color.r * 255, color.g * 255, color.b * 255);
+            if (t_min < far_distance)
+            {
+                image.set_pixel(col, row, color.r * 255, color.g * 255, color.b * 255);
+            }
 
             if (col == targetValue)
             {

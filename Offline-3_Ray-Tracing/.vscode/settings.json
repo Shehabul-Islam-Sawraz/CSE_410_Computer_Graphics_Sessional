@@ -5,7 +5,10 @@
     "new": "cpp",
     "iostream": "cpp",
     "fstream": "cpp",
-    "iosfwd": "cpp"
+    "iosfwd": "cpp",
+    "bitset": "c",
+    "string_view": "c",
+    "regex": "c"
   },
   "C_Cpp_Runner.msvcBatchPath": "",
   "C_Cpp_Runner.cCompilerPath": "gcc",
