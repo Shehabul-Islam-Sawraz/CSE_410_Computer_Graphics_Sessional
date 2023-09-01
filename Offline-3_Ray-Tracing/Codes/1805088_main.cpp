@@ -317,17 +317,6 @@ void keyboardListener(unsigned char key, int x, int y)
         traceRays();
         break;
     case '1':
-        // Rotate left
-        r.x = r.x * cos(-rate) + l.x * sin(-rate);
-        r.y = r.y * cos(-rate) + l.y * sin(-rate);
-        r.z = r.z * cos(-rate) + l.z * sin(-rate);
-
-        l.x = l.x * cos(-rate) - r.x * sin(-rate);
-        l.y = l.y * cos(-rate) - r.y * sin(-rate);
-        l.z = l.z * cos(-rate) - r.z * sin(-rate);
-        break;
-
-    case '2':
         // Rotate right
         r.x = r.x * cos(rate) + l.x * sin(rate);
         r.y = r.y * cos(rate) + l.y * sin(rate);
@@ -336,6 +325,17 @@ void keyboardListener(unsigned char key, int x, int y)
         l.x = l.x * cos(rate) - r.x * sin(rate);
         l.y = l.y * cos(rate) - r.y * sin(rate);
         l.z = l.z * cos(rate) - r.z * sin(rate);
+        break;
+
+    case '2':
+        // Rotate left
+        r.x = r.x * cos(-rate) + l.x * sin(-rate);
+        r.y = r.y * cos(-rate) + l.y * sin(-rate);
+        r.z = r.z * cos(-rate) + l.z * sin(-rate);
+
+        l.x = l.x * cos(-rate) - r.x * sin(-rate);
+        l.y = l.y * cos(-rate) - r.y * sin(-rate);
+        l.z = l.z * cos(-rate) - r.z * sin(-rate);
         break;
 
     case '3':
@@ -468,30 +468,30 @@ void initGL(void)
     glEnable(GL_POINT_SMOOTH);
     glEnable(GL_LINE_SMOOTH);
 
-    // load the PROJECTION matrix
+    // Load the PROJECTION matrix
     glMatrixMode(GL_PROJECTION);
 
-    // initialize the matrix
+    // Initialize the matrix
     glLoadIdentity();
 
-    // give PERSPECTIVE parameters
+    // Give PERSPECTIVE parameters
     gluPerspective(fov_y, aspect_ratio, near_distance, far_distance);
 }
 
 void display()
 {
-    // clear the display
+    // Clear the display
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glClearColor(0, 0, 0, 0); // color black
+    glClearColor(0, 0, 0, 0); // Color black
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // load the correct matrix -- MODEL-VIEW matrix
+    // Load the correct matrix -- MODEL-VIEW matrix
     glMatrixMode(GL_MODELVIEW);
 
-    // initialize the matrix
+    // Initialize the matrix
     glLoadIdentity();
 
-    // now give three info
+    // Now we have to set three info
     // 1. where is the camera (viewer)?
     // 2. where is the camera looking?
     // 3. Which direction is the camera's UP direction?
@@ -500,13 +500,12 @@ void display()
               pos.x + l.x, pos.y + l.y, pos.z + l.z,
               u.x, u.y, u.z);
 
-    // again select MODEL-VIEW
+    // Again select MODEL-VIEW
     glMatrixMode(GL_MODELVIEW);
 
     drawAxes();
 
-    // checkBoard->draw();
-
+    // Start Draw Objects
     for (Object *each : objects)
     {
         each->draw();
@@ -553,10 +552,10 @@ int main(int argc, char **argv)
     glutCreateWindow("1805088 - Ray Tracing");
     initGL();
 
-    glEnable(GL_DEPTH_TEST); // enable Depth Testing
+    glEnable(GL_DEPTH_TEST); // Enable Depth Testing
 
-    glutDisplayFunc(display); // display callback function
-    glutIdleFunc(animate);    // what you want to do in the idle time (when no drawing is occuring)
+    glutDisplayFunc(display); // Display callback function
+    glutIdleFunc(animate);    // What you want to do in the idle time (when no drawing is occuring)
 
     glutKeyboardFunc(keyboardListener);
     glutSpecialFunc(specialKeyListener);

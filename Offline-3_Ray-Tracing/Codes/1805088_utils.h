@@ -67,7 +67,7 @@ void drawSphere(double radius, int noOfStacks, int noOfSlices, bool isLightSourc
                                        r * sin(((double)j / (double)noOfSlices) * 2 * PI), h);
         }
     }
-    // draw quads using generated points
+    // Draw quads using generated points
     for (i = 0; i < noOfStacks; i++)
     {
         glPushMatrix();
@@ -197,9 +197,6 @@ void drawPointLightSource(PointVector pos, double fallOffParameter)
     glColor3f(1.0f, 1.0f, 1.0f);
     glTranslatef(pos.x, pos.y, pos.z);
     glutSolidSphere(2, 16, 16);
-    /**
-     * Eikhane is Light Source er false k true banaite hbe naki check kora lagbe
-     */
     // drawSphere(5, 16, 16, false,
     //            pos.x, pos.y, pos.z,
     //            1.0f, 1.0f, 1.0f);
@@ -340,13 +337,12 @@ public:
         PointVector normal = this->getNormalAt(intPoint);
         normal.normalize();
 
+        //	Light Illumination & Casting
         //	----------------------------------
-        //	Basic Light Illumination & Casting
-        //	----------------------------------
-        //	Point Lights
 
         double lambertValue = 0, phongValue = 0;
 
+        //	Point Lights
         for (PointLight *eachLight : pointLights)
         {
             PointVector lightDirection = eachLight->position_source - intPoint;
@@ -398,11 +394,8 @@ public:
         }
 
         //	Spot Lights
-        //  https://ogldev.org/www/tutorial21/tutorial21.html
-
         for (SpotLight *eachSpotLight : spotLights)
         {
-            // cout << "Eikhane aise 1" << endl;
             PointVector lightDirection = eachSpotLight->light_direction;
             double distance = sqrt(lightDirection.x * lightDirection.x +
                                    lightDirection.y * lightDirection.y +
@@ -412,11 +405,8 @@ public:
             PointVector lightToIntersect = eachSpotLight->position_source - intPoint;
             lightToIntersect.normalize();
 
-            // cout << "Eikhane aise 2" << endl;
-
             double cos_theta = lightDirection.dotProduct(lightToIntersect);
             double theta = radToDeg(acos(cos_theta));
-
             // cout << theta << endl;
 
             if (fabs(theta) > eachSpotLight->cutoff_angle)
@@ -424,19 +414,11 @@ public:
                 continue;
             }
 
-            //	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-            //	Except the beginning part of the spotLight,
-            //	remaining will be the same as PointLight
-
-            // cout << "Eikhane aise 3" << endl;
-
             lightDirection = eachSpotLight->position_source - intPoint;
             lightDirection.normalize();
 
             PointVector lightPosition = intPoint + lightDirection * EPSILON;
             Ray lightRay(lightPosition, lightDirection);
-
-            // cout << "Eikhane aise 4" << endl;
 
             Color tempColor;
             double t, t_min_original = INFINITY;
@@ -449,8 +431,6 @@ public:
                     t_min_original = t;
                 }
             }
-
-            // cout << "Eikhane aise 5" << endl;
 
             if (t_min < t_min_original)
             {
@@ -468,15 +448,14 @@ public:
                 color = color + this->getColorAt(intPoint) * phongValue * this->coEfficients[2];
                 color.normalize();
             }
-
-            // cout << "Eikhane aise 6" << endl;
         }
 
-        //	----------------------------
         //  Perform recursive reflection
         //	----------------------------
         if (level >= level_of_recursion)
+        {
             return t_min;
+        }
 
         PointVector refRayDirection;
         refRayDirection = ray.direction - normal * 2.0 * (normal.dotProduct(ray.direction));
@@ -532,8 +511,8 @@ class CheckerBoard : public Object
 public:
     double cb_width;
     double tile_width;
-    Color **textureBlack;
-    Color **textureWhite;
+    // Color **textureBlack;
+    // Color **textureWhite;
     bitmap_image whiteTextureImg, blackTextureImg;
 
     CheckerBoard(double cb_width, double tile_width)
@@ -562,7 +541,9 @@ public:
                 }
 
                 glPushMatrix();
-                glTranslatef(-fov_y + int(pos.x / tile_width / 2) * tile_width * 2, -fov_y + int(pos.y / tile_width / 2) * tile_width * 2, 0);
+                // Make the Checkerboard infinite
+                glTranslatef(-fov_y + int(pos.x / tile_width / 2) * tile_width * 2,
+                             -fov_y + int(pos.y / tile_width / 2) * tile_width * 2, 0);
 
                 glBegin(GL_QUADS);
                 {
@@ -582,9 +563,8 @@ public:
     {
         this->blackTextureImg = bitmap_image(black_img_path);
         this->whiteTextureImg = bitmap_image(white_img_path);
-
-        this->textureBlack = loadBitmapImage(black_img_path);
-        this->textureWhite = loadBitmapImage(white_img_path);
+        // this->textureBlack = loadBitmapImage(black_img_path);
+        // this->textureWhite = loadBitmapImage(white_img_path);
         cout << "Texture load complete" << endl;
     }
 
@@ -645,43 +625,25 @@ public:
             tex_x = (int)(blackTextureImg.width() * x) / tile_width;
             tex_y = (int)(blackTextureImg.height() * y) / tile_width;
 
-            // return textureBlack[tex_x][tex_y];
+            tex_x %= blackTextureImg.width();
+            tex_y %= blackTextureImg.height();
+
             unsigned char r, g, b;
             blackTextureImg.get_pixel(tex_x, tex_y, r, g, b);
-            // cout << __LINE__ << endl;
-
-            double color_r = c * tile + (r / 255.0) * tex;
-            double color_g = c * tile + (g / 255.0) * tex;
-            double color_b = c * tile + (b / 255.0) * tex;
-
-            return Color(color_r, color_g, color_b);
+            return Color(r / 255.0, g / 255.0, b / 255.0);
         }
         else
         {
             tex_x = (int)(whiteTextureImg.width() * x) / tile_width;
             tex_y = (int)(whiteTextureImg.height() * y) / tile_width;
 
-            // return textureWhite[tex_x][tex_y];
+            tex_x %= whiteTextureImg.width();
+            tex_y %= whiteTextureImg.height();
+
             unsigned char r, g, b;
             whiteTextureImg.get_pixel(tex_x, tex_y, r, g, b);
-            // cout << __LINE__ << endl;
-
-            double color_r = c * tile + (r / 255.0) * tex;
-            double color_g = c * tile + (g / 255.0) * tex;
-            double color_b = c * tile + (b / 255.0) * tex;
-
-            return Color(color_r, color_g, color_b);
+            return Color(r / 255.0, g / 255.0, b / 255.0);
         }
-
-        // unsigned char r, g, b;
-        // texture.get_pixel(tex_x, tex_y, r, g, b);
-        // // cout << __LINE__ << endl;
-
-        // double color_r = c * tile + (r / 255.0) * tex;
-        // double color_g = c * tile + (g / 255.0) * tex;
-        // double color_b = c * tile + (b / 255.0) * tex;
-
-        // return Color(color_r, color_g, color_b);
     }
 };
 
@@ -808,9 +770,9 @@ public:
         vector<PointVector> arr = {V0, V1, V2, V3, V4};
         PointVector C = PointVector(reference_point.x + this->object_width / 2.0,
                                     reference_point.y + this->object_width / 2.0,
-                                    reference_point.z + this->object_height); // top point
+                                    reference_point.z + this->object_height); // Top point
 
-        // for each triangles
+        // For each triangles
         for (int a = 1; a < 5; a++)
         {
             PointVector A = arr[a - 1];
